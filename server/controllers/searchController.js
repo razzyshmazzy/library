@@ -2,6 +2,7 @@ const openLibrary = require('../services/openLibraryClient');
 const internetArchive = require('../services/internetArchiveClient');
 const googleBooks = require('../services/googleBooksClient');
 const { deduplicateBooks, rankBooks, parallelSearch } = require('../services/pdfAggregator');
+const { filterAdultContent } = require('../utils/contentFilter');
 const logger = require('../utils/logger');
 
 // Map URL parameter names to service objects
@@ -48,9 +49,14 @@ async function getSuggestions(req, res, next) {
       }
     }
 
-    // Deduplicate by exact title (case-insensitive) and return top 10
+    // Strip adult suggestions, then deduplicate by title
+    const safeSuggestions = suggestions.filter(s => {
+      const { books } = filterAdultContent([{ title: s.title, category: '', description: '' }]);
+      return books.length > 0;
+    });
+
     const seen = new Set();
-    const unique = suggestions.filter(({ title }) => {
+    const unique = safeSuggestions.filter(({ title }) => {
       const key = title.toLowerCase().trim();
       if (seen.has(key)) return false;
       seen.add(key);
@@ -92,10 +98,14 @@ async function getResults(req, res, next) {
 
     const { results: raw, totals, errors } = await parallelSearch(fns);
 
-    // Optionally filter by category (client-side post-filter since APIs don't all support it)
+    // Strip adult content before any further processing
+    const { books: safe, removed } = filterAdultContent(raw);
+    if (removed > 0) logger.debug(`[searchController] filtered ${removed} adult content result(s)`);
+
+    // Optionally filter by category
     const filtered = category
-      ? raw.filter((b) => b.category?.toLowerCase().includes(category.toLowerCase()))
-      : raw;
+      ? safe.filter((b) => b.category?.toLowerCase().includes(category.toLowerCase()))
+      : safe;
 
     const deduped = deduplicateBooks(filtered);
     const ranked = rankBooks(deduped);

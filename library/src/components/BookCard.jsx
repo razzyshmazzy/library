@@ -1,52 +1,85 @@
+import { isSafeCover } from '../utils/isSafeCover'
+
 const SOURCE_LABELS = {
   openLibrary: 'Open Library',
   internetArchive: 'Internet Archive',
   googleBooks: 'Google Books',
 }
 
-export default function BookCard({ book, onClick }) {
-  const label = SOURCE_LABELS[book.source] || book.source
+export default function BookCard({ book, view = 'grid', onClick }) {
+  const year = book.publishedDate ? String(book.publishedDate).slice(0, 4) : null
+  const showCover = book.coverUrl && isSafeCover(book)
+
+  if (view === 'list') {
+    return (
+      <article
+        className="book-list-item"
+        onClick={() => onClick(book)}
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && onClick(book)}
+        role="button"
+        aria-label={`View details for ${book.title}`}
+      >
+        <div className="list-cover">
+          {showCover
+            ? <img src={book.coverUrl} alt="" loading="lazy" />
+            : <div className="cover-placeholder" aria-hidden="true"><span>{(book.title || '?')[0].toUpperCase()}</span></div>
+          }
+        </div>
+
+        <div className="list-info">
+          <span className="list-title">{book.title}</span>
+          {book.author && <span className="list-author">{book.author}</span>}
+          <div className="list-meta">
+            <span className={`source-dot source-${book.source}`} title={SOURCE_LABELS[book.source]} />
+            <span className={`source-label source-${book.source}`}>{SOURCE_LABELS[book.source]}</span>
+            {year && <span className="meta-year">{year}</span>}
+            {book.pages && <span className="meta-pages">{book.pages} pp</span>}
+            {book.rating && (
+              <span className="meta-rating" title={`${book.rating}/5`}>
+                {'★'.repeat(Math.round(book.rating))}
+              </span>
+            )}
+            {book.pdfUrl && <span className="pdf-badge" style={{position:'static'}}>PDF</span>}
+            {book.publicDomain && <span className="pd-badge" style={{position:'static'}}>Free</span>}
+          </div>
+          {book.description && <p className="list-desc">{book.description}</p>}
+        </div>
+      </article>
+    )
+  }
 
   return (
-    <article className="book-card" onClick={() => onClick(book)} tabIndex={0}
+    <article
+      className="book-card"
+      onClick={() => onClick(book)}
+      tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick(book)}
-      role="button" aria-label={`View details for ${book.title}`}
+      role="button"
+      aria-label={`View details for ${book.title}`}
     >
       <div className="book-cover">
-        {book.coverUrl
-          ? <img src={book.coverUrl} alt={`Cover of ${book.title}`} loading="lazy" />
-          : <CoverPlaceholder title={book.title} />
+        {showCover
+          ? <img src={book.coverUrl} alt="" loading="lazy" />
+          : <div className="cover-placeholder" aria-hidden="true"><span>{(book.title || '?')[0].toUpperCase()}</span></div>
         }
-        {book.pdfUrl && <span className="pdf-badge" title="PDF available">PDF</span>}
-        {book.publicDomain && <span className="pd-badge" title="Public domain">Free</span>}
+        {book.pdfUrl && <span className="pdf-badge">PDF</span>}
+        {book.publicDomain && <span className="pd-badge">Free</span>}
       </div>
 
       <div className="book-info">
         <h3 className="book-title">{book.title}</h3>
         {book.author && <p className="book-author">{book.author}</p>}
-        <div className="book-meta">
-          {book.publishedDate && (
-            <span className="meta-year">{String(book.publishedDate).slice(0, 4)}</span>
-          )}
-          {book.pages && <span className="meta-pages">{book.pages} pp</span>}
+        <div className="book-footer">
+          <span className={`source-dot source-${book.source}`} title={SOURCE_LABELS[book.source]} />
+          {year && <span className="meta-year">{year}</span>}
           {book.rating && (
             <span className="meta-rating" title={`${book.rating}/5`}>
-              {'★'.repeat(Math.round(book.rating))}{'☆'.repeat(5 - Math.round(book.rating))}
+              {'★'.repeat(Math.round(book.rating))}
             </span>
           )}
         </div>
-        <span className={`source-badge source-${book.source}`}>{label}</span>
       </div>
     </article>
-  )
-}
-
-function CoverPlaceholder({ title }) {
-  // Use the first letter of the title as a placeholder
-  const letter = (title || '?')[0].toUpperCase()
-  return (
-    <div className="cover-placeholder" aria-hidden="true">
-      <span>{letter}</span>
-    </div>
   )
 }
