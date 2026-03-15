@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import PDFViewer from './PDFViewer'
+import TextViewer from './TextViewer'
 import { isSafeCover } from '../utils/isSafeCover'
 
 const SOURCE_LABELS = {
@@ -11,32 +12,36 @@ const SOURCE_LABELS = {
 export default function BookDetail({ book, onClose }) {
   const dialogRef = useRef(null)
   const [viewingPdf, setViewingPdf] = useState(false)
+  const [viewingText, setViewingText] = useState(false)
   const [resolvedPdfUrl, setResolvedPdfUrl] = useState(null)
-  const [resolvingPdf, setResolvingPdf] = useState(false)
-  const [resolvedFormats, setResolvedFormats] = useState(null) // null = not yet fetched
-  const [noPdfError, setNoPdfError] = useState(false)
+  const [resolvedTextUrl, setResolvedTextUrl] = useState(null)
+  const [resolvingFile, setResolvingFile] = useState(false)
+  const [resolvedFormats, setResolvedFormats] = useState(null)
+  const [noFileError, setNoFileError] = useState(false)
 
-  async function handleReadPdf() {
+  async function handleRead() {
     if (book.source === 'internetArchive') {
-      setResolvingPdf(true)
-      setNoPdfError(false)
+      setResolvingFile(true)
+      setNoFileError(false)
       try {
         const res = await fetch(`/api/books/${book.id}?source=internetArchive`)
         const data = await res.json()
 
+        setResolvedFormats(data.downloadFormats || [])
+
         if (data.pdfUrl) {
           setResolvedPdfUrl(data.pdfUrl)
-          setResolvedFormats(data.downloadFormats || [])
           setViewingPdf(true)
+        } else if (data.textUrl) {
+          setResolvedTextUrl(data.textUrl)
+          setViewingText(true)
         } else {
-          // No PDF — store what formats are available and show a message
-          setResolvedFormats(data.downloadFormats || [])
-          setNoPdfError(true)
+          setNoFileError(true)
         }
       } catch {
-        setNoPdfError(true)
+        setNoFileError(true)
       } finally {
-        setResolvingPdf(false)
+        setResolvingFile(false)
       }
     } else {
       setResolvedPdfUrl(book.pdfUrl)
@@ -62,7 +67,6 @@ export default function BookDetail({ book, onClose }) {
   const year = book.publishedDate ? String(book.publishedDate).slice(0, 4) : null
   const showCover = book.coverUrl && isSafeCover(book)
 
-  // Build the IA item page URL for direct-download fallback
   const iaPageUrl = book.source === 'internetArchive'
     ? `https://archive.org/details/${book.id}`
     : null
@@ -111,9 +115,9 @@ export default function BookDetail({ book, onClose }) {
                 <p className="modal-description">{book.description}</p>
               )}
 
-              {noPdfError ? (
+              {noFileError ? (
                 <div className="no-pdf-msg">
-                  <p>No PDF available for this title.</p>
+                  <p>No readable file available for this title.</p>
                   {resolvedFormats?.length > 0 && (
                     <p className="no-pdf-formats">
                       Available formats: {resolvedFormats.join(', ')}
@@ -135,10 +139,10 @@ export default function BookDetail({ book, onClose }) {
                 <div className="modal-actions">
                   <button
                     className="action-btn primary"
-                    onClick={handleReadPdf}
-                    disabled={resolvingPdf}
+                    onClick={handleRead}
+                    disabled={resolvingFile}
                   >
-                    {resolvingPdf ? 'Loading…' : 'Read PDF'}
+                    {resolvingFile ? 'Loading…' : 'Read'}
                   </button>
                   <a
                     href={book.pdfUrl}
@@ -160,6 +164,14 @@ export default function BookDetail({ book, onClose }) {
           url={resolvedPdfUrl}
           title={book.title}
           onClose={() => setViewingPdf(false)}
+        />
+      )}
+
+      {viewingText && resolvedTextUrl && (
+        <TextViewer
+          url={resolvedTextUrl}
+          title={book.title}
+          onClose={() => setViewingText(false)}
         />
       )}
     </>

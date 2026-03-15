@@ -1,4 +1,5 @@
 import { isSafeCover } from '../utils/isSafeCover'
+import { GlowingEffect } from './ui/GlowingEffect'
 
 const SOURCE_LABELS = {
   openLibrary: 'Open Library',
@@ -20,6 +21,8 @@ export default function BookCard({ book, view = 'grid', onClick }) {
         role="button"
         aria-label={`View details for ${book.title}`}
       >
+        <GlowingEffect spread={30} proximity={64} inactiveZone={0.01} borderWidth={2} />
+
         <div className="list-cover">
           {showCover
             ? <img src={book.coverUrl} alt="" loading="lazy" />
@@ -58,6 +61,8 @@ export default function BookCard({ book, view = 'grid', onClick }) {
       role="button"
       aria-label={`View details for ${book.title}`}
     >
+      <GlowingEffect spread={30} proximity={64} inactiveZone={0.01} borderWidth={2} />
+
       <div className="book-cover">
         {showCover
           ? <img src={book.coverUrl} alt="" loading="lazy" />

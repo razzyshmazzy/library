@@ -8,6 +8,7 @@ const logger = require('./utils/logger');
 const searchRoutes = require('./routes/search');
 const bookRoutes = require('./routes/books');
 const pdfRoutes = require('./routes/pdfs');
+const proxyRoutes = require('./routes/proxy');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/api/search', searchRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/pdfs', pdfRoutes);
+app.use('/api/proxy', proxyRoutes);
 
 // Health check — useful for load balancers and CI smoke tests
 app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));

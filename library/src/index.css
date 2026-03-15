@@ -1,3 +1,5 @@
+@tailwind utilities;
+
 :root {
   --text:          #7a6e65;
   --text-h:        #1c130d;

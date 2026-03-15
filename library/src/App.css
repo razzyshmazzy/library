@@ -301,6 +301,7 @@
   background: transparent;
   border: none;
   text-align: left;
+  position: relative;
 
   &:hover .book-cover img { box-shadow: var(--shadow); transform: translateY(-3px); }
   &:hover .book-cover .cover-placeholder { box-shadow: var(--shadow); transform: translateY(-3px); }
@@ -421,6 +422,7 @@
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background 0.1s, margin 0.1s, padding 0.1s;
+  position: relative;
 
   &:first-child { border-top: 1px solid var(--border); }
   &:hover {
@@ -854,6 +856,88 @@
   flex: 1;
   width: 100%;
   border: none;
+}
+
+/* ── Text Viewer ─────────────────────────────────────────────────────────── */
+
+.text-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.text-viewer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 48px 24px 80px;
+}
+
+.text-viewer-status {
+  text-align: center;
+  padding: 60px;
+  color: var(--text);
+  font-style: italic;
+  font-size: 15px;
+
+  a { color: var(--accent); }
+}
+
+.text-viewer-content {
+  max-width: 680px;
+  margin: 0 auto;
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--text-h);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  tab-size: 4;
+}
+
+/* ── Glow border effect ──────────────────────────────────────────────────── */
+
+.glow-border {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  --start: 0deg;
+  --active: 0;
+}
+
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--glowingeffect-border-width, 2px) * -1);
+  border: var(--glowingeffect-border-width, 2px) solid transparent;
+  border-radius: inherit;
+  background: radial-gradient(circle, #dd7ddf, #e46cbf, #e7a669, #e5de55, #5fcbf5, #7daaef, #dd7ddf 40%);
+  background-attachment: fixed;
+  -webkit-mask-clip: padding-box, border-box;
+  mask-clip: padding-box, border-box;
+  -webkit-mask-composite: destination-in;
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(#0000, #0000),
+    conic-gradient(
+      from calc(var(--start) - calc(var(--spread, 20) * 1deg)),
+      #000 0deg,
+      #fff calc(var(--spread, 20) * 2deg),
+      #000 calc(var(--spread, 20) * 2deg)
+    );
+  mask-image:
+    linear-gradient(#0000, #0000),
+    conic-gradient(
+      from calc(var(--start) - calc(var(--spread, 20) * 1deg)),
+      #000 0deg,
+      #fff calc(var(--spread, 20) * 2deg),
+      #000 calc(var(--spread, 20) * 2deg)
+    );
+  opacity: var(--active);
+  transition: opacity 0.35s ease-out;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */

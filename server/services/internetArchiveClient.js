@@ -25,6 +25,7 @@ async function throttle() {
 function resolveFormats(identifier, files = []) {
   const formats = [];
   let pdfUrl = null;
+  let textUrl = null;
 
   for (const file of files) {
     const name = (file.name || '').toLowerCase();
@@ -35,13 +36,15 @@ function resolveFormats(identifier, files = []) {
       formats.push('epub');
     } else if (name.endsWith('.txt')) {
       formats.push('txt');
+      if (!textUrl) textUrl = `${DOWNLOAD_URL}/${identifier}/${encodeURIComponent(file.name)}`;
     }
   }
 
   return {
     pdfUrl,
+    textUrl,
     downloadFormats: [...new Set(formats)],
-    publicDomain: true, // IA only hosts open-access / public-domain texts
+    publicDomain: true,
   };
 }
 
@@ -130,7 +133,7 @@ async function getBook(identifier) {
     const { data } = await axios.get(`${METADATA_URL}/${identifier}`, { timeout: 8000 });
     const meta = data?.metadata || {};
     const files = data?.files || [];
-    const { pdfUrl, downloadFormats, publicDomain } = resolveFormats(identifier, files);
+    const { pdfUrl, textUrl, downloadFormats, publicDomain } = resolveFormats(identifier, files);
 
     const coverUrl = `https://archive.org/services/img/${identifier}`;
 
@@ -145,6 +148,7 @@ async function getBook(identifier) {
       publishedDate: meta.date || meta.year || '',
       category: Array.isArray(meta.subject) ? meta.subject[0] : meta.subject || '',
       pdfUrl,
+      textUrl,
       downloadFormats,
       language: Array.isArray(meta.language) ? meta.language[0] : meta.language || 'en',
       pages: meta.imagecount ? parseInt(meta.imagecount, 10) : null,
