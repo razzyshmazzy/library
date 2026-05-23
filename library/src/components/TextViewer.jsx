@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { API_BASE } from '../api'
 
 export default function TextViewer({ url, title, onClose }) {
   const [text, setText] = useState(null)
@@ -8,7 +9,7 @@ export default function TextViewer({ url, title, onClose }) {
   useEffect(() => {
     setLoading(true)
     setError(false)
-    fetch(`/api/proxy/text?url=${encodeURIComponent(url)}`)
+    fetch(`${API_BASE}/api/proxy/text?url=${encodeURIComponent(url)}`)
       .then((r) => {
         if (!r.ok) throw new Error('Failed to load')
         return r.text()

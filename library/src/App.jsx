@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import SearchBar from './components/SearchBar'
 import BookCard from './components/BookCard'
 import BookDetail from './components/BookDetail'
+import { API_BASE } from './api'
 import './App.css'
 
 const LIMIT = 20
@@ -42,7 +43,7 @@ export default function App() {
     })
 
     try {
-      const res = await fetch(`/api/search/results?${params}`)
+      const res = await fetch(`${API_BASE}/api/search/results?${params}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error?.message || 'Search failed')
       setResults(data.results || [])

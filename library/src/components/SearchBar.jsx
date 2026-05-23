@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE } from '../api'
 
 const DEBOUNCE_MS = 300
 
@@ -21,7 +22,7 @@ export default function SearchBar({ onSearch, loading }) {
 
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`)
+        const res = await fetch(`${API_BASE}/api/search/suggestions?q=${encodeURIComponent(query)}`)
         const data = await res.json()
         setSuggestions(data.suggestions || [])
         setShowSuggestions(true)

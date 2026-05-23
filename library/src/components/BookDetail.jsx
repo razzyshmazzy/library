@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import PDFViewer from './PDFViewer'
 import TextViewer from './TextViewer'
 import { isSafeCover } from '../utils/isSafeCover'
+import { API_BASE } from '../api'
 
 const SOURCE_LABELS = {
   openLibrary: 'Open Library',
@@ -24,7 +25,7 @@ export default function BookDetail({ book, onClose }) {
       setResolvingFile(true)
       setNoFileError(false)
       try {
-        const res = await fetch(`/api/books/${book.id}?source=internetArchive`)
+        const res = await fetch(`${API_BASE}/api/books/${book.id}?source=internetArchive`)
         const data = await res.json()
 
         setResolvedFormats(data.downloadFormats || [])
