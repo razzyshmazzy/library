@@ -16,7 +16,7 @@ function deduplicateBooks(books) {
   for (const book of books) {
     const isbnKey = book.isbn ? `isbn:${String(book.isbn).trim()}` : null;
     const titleKey =
-      book.title && book.author
+      typeof book.title === 'string' && typeof book.author === 'string'
         ? `title:${book.title.toLowerCase().trim()}|${book.author.toLowerCase().trim()}`
         : null;
 

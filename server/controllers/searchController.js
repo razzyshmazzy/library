@@ -57,8 +57,10 @@ async function getSuggestions(req, res, next) {
 
     const seen = new Set();
     const unique = safeSuggestions.filter(({ title }) => {
-      const key = title.toLowerCase().trim();
-      if (seen.has(key)) return false;
+      // A source may hand back a non-string (or missing) title — coerce
+      // defensively and drop empties rather than crashing the request.
+      const key = String(title ?? '').toLowerCase().trim();
+      if (!key || seen.has(key)) return false;
       seen.add(key);
       return true;
     });
