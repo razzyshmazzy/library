@@ -4,6 +4,12 @@ const allowedOrigins = [
   'http://localhost:5173', // Vite dev server
   'http://localhost:3000',
   'http://127.0.0.1:5173',
+  // Production origins from env, comma-separated.
+  // e.g. ALLOWED_ORIGINS=https://razzyshmazzy.github.io
+  ...(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
 ];
 
 const corsOptions = {

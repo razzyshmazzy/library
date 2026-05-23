@@ -1,0 +1,26 @@
+# Render blueprint for the Express backend (server/).
+# Deploy: render.com → New → Blueprint → connect this repo.
+# Render provides PORT automatically; server.js already reads process.env.PORT.
+services:
+  - type: web
+    name: library-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Production mode also enforces the CORS allowlist below
+      # (development mode bypasses it).
+      - key: NODE_ENV
+        value: production
+      # Origin of the GitHub Pages site allowed to call this API.
+      # Comma-separate to add more (e.g. a custom domain).
+      - key: ALLOWED_ORIGINS
+        value: https://razzyshmazzy.github.io
+      # Secret — set the value in the Render dashboard, not in git.
+      # Without it, Google Books silently returns 0 results.
+      - key: GOOGLE_BOOKS_API_KEY
+        sync: false
